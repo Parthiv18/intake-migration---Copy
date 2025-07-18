@@ -1,5 +1,6 @@
-name: CI & Deploy
+name: 🎉 Deploy to GitHub Pages
 
+# Grant the built-in token permission to push & publish
 permissions:
   contents: write    # allow commits & pushes
   pages:    write    # allow Pages publishing
@@ -10,47 +11,23 @@ on:
       - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      # 1) Checkout your repo — this brings in intakedb.db at the root
-      - uses: actions/checkout@v3
-
-      # 2) (Optional) install sqlite3 CLI so you can run quick checks
-      - name: Install sqlite3 CLI
-        run: sudo apt-get update && sudo apt-get install -y sqlite3
-
-      # 3) Sanity-check your DB: list the file and maybe run a simple query
-      - name: List repo contents
-        run: ls -la .
-
-      - name: Inspect SQLite schema
-        run: |
-          sqlite3 ./intakedb.db ".schema" 
-
-      # 4) Run your Node tests (or server) against that DB
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run integration tests
-        # if your tests know to pick up ./intakedb.db automatically
-        run: npm test
-
   deploy:
-    needs: test
     runs-on: ubuntu-latest
     steps:
+      # 1) Checkout your entire repo (this brings in intakedb.db at root)
       - uses: actions/checkout@v3
         with:
           persist-credentials: true
 
+      # 2) Install dependencies (if you actually need them for a build)
       - name: Install dependencies
         run: npm ci
 
-      - name: Build (if needed)
+      # 3) Build (no-op or your real build)
+      - name: Build
         run: npm run build
 
-      # (You don’t really use intakedb.db here; Pages is static-only.)
+      # 4) Push the entire working directory (including intakedb.db) to gh-pages
       - name: Publish to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
