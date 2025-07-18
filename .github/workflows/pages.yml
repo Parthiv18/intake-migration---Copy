@@ -1,8 +1,9 @@
 name: 🎉 Deploy to GitHub Pages
 
+# Grant the built-in token permission to push & publish
 permissions:
-  contents: write
-  pages:    write
+  contents: write    # allow commits & pushes
+  pages:    write    # allow Pages publishing
 
 on:
   push:
@@ -13,23 +14,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1) Checkout & make GITHUB_TOKEN available for git push
       - uses: actions/checkout@v3
         with:
           persist-credentials: true
 
-      # Download the DB you uploaded earlier
-      - name: Download test DB
-        uses: actions/download-artifact@v3
+      # 2) Install any dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 3) Run your (stub) build so npm run build never fails
+      - name: Build (if needed)
+        run: npm run build
+
+      # 4) Publish the root of your repo to gh-pages
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          name: test-db
-          path: .
-
-      - name: Install SQLite
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y sqlite3
-
-      - name: Verify DB
-        run: ls -lh intakedb.db
-
-      # …then your build & publish steps as before…
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: .     # <-- point at the repo root
