@@ -14,23 +14,23 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1) Checkout your entire repo (this brings in intakedb.db at root)
+      # 1) Checkout & make GITHUB_TOKEN available for git push
       - uses: actions/checkout@v3
         with:
           persist-credentials: true
 
-      # 2) Install dependencies (if you actually need them for a build)
+      # 2) Install any dependencies
       - name: Install dependencies
         run: npm ci
 
-      # 3) Build (no-op or your real build)
-      - name: Build
+      # 3) Run your (stub) build so npm run build never fails
+      - name: Build (if needed)
         run: npm run build
 
-      # 4) Push the entire working directory (including intakedb.db) to gh-pages
+      # 4) Publish the root of your repo to gh-pages
       - name: Publish to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: .
+          publish_dir: .     # <-- point at the repo root
